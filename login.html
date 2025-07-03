@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - Maxon Healthcare</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="maxonlogo.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  openLoginPopup();
+});
+if (localStorage.getItem('userData').length > 0) {
+        //alert('You are already logged in!');
+        window.location.href = 'dashboard.html';
+      }
+</script>
+<div id="loginPopup">
+  <div class="login-landscape-container">
+    <!-- Logo Side -->
+    <div class="login-logo-side">
+      <img src="maxonlogo.png" alt="Maxon Healthcare Logo">
+    </div>
+    <button onclick="closeLoginPopup()" class="close-btn" aria-label="Close">&times;</button>
+    <div class="login-divider"></div>
+    <!-- Form Side -->
+    <div class="login-form-side">
+      <h2>Sign In to Maxon Healthcare</h2>
+      <form id="modalLoginForm">
+        <div>
+          <label for="modalLoginEmail">Username</label>
+          <input id="modalLoginEmail" name="username" type="text" required placeholder="Enter your username">
+        </div>
+        <div>
+          <label for="modalLoginPassword">Password</label>
+          <input id="modalLoginPassword" name="password" type="password" required placeholder="Enter your password">
+        </div>
+        <div class="show-password-row">
+          <input type="checkbox" id="showPassword">
+          <label for="showPassword">Show Password</label>
+        </div>
+        <div id="modalLoginError" style="display:none; color: red; text-align: center;"></div>
+        <button type="submit">Sign In</button>
+      </form>
+      <a href="#">Forget Password</a>
+    </div>
+  </div>
+</div>
+
+<script>
+
+
+
+// Open login popup
+function openLoginPopup() {
+    document.getElementById('loginPopup').style.display = 'flex';
+}
+// Close login popup
+function closeLoginPopup() {
+    document.getElementById('loginPopup').style.display = 'none';
+    document.getElementById('modalLoginForm').reset();
+    document.getElementById('modalLoginError').style.display = 'none';
+    // If on login.html as a standalone page, redirect to home
+    if (window.location.pathname.endsWith('login.html')) {
+        window.location.href = 'index.html';
+    }
+}
+// Dismiss login popup when clicking outside or pressing Escape
+(function() {
+  const loginPopup = document.getElementById('loginPopup');
+  if (loginPopup) {
+    loginPopup.addEventListener('click', function(e) {
+      if (e.target === loginPopup) closeLoginPopup();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (loginPopup.style.display === 'flex' && (e.key === 'Escape' || e.keyCode === 27)) closeLoginPopup();
+    });
+  }
+})();
+// Login validation logic
+const modalLoginForm = document.getElementById('modalLoginForm');
+if (modalLoginForm) {
+  modalLoginForm.addEventListener('submit', async function(e) {
+
+    e.preventDefault();
+    const name = document.getElementById('modalLoginEmail').value.trim();
+    const password = document.getElementById('modalLoginPassword').value;
+
+    if (!name || !password) {
+      alert('Please enter both username and password.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, password })
+      });
+
+      if (response.ok) {
+        // Save user data to localStorage for dashboard authentication
+        localStorage.setItem('userData', JSON.stringify({ name, password }));
+        window.location.href = 'dashboard.html';
+        //store the username and password
+        //const data = await response.json();
+                // Display HTML message content
+                //if (true) {
+                //   document.documentElement.innerHTML = data.html;
+                //   document.getElementById('userName').textContent = 'Welcome, '+data.emp_id;
+                //   alert('executing in login.html');
+                //} else {
+                //    document.documentElement.innerHTML = '<p style="color: grey;">No HTML message provided in the response.</p>';
+                //}
+      } else {
+        alert('Wrong username or password');
+        document.getElementById('modalLoginError').textContent = 'Invalid username or password';
+        document.getElementById('modalLoginError').style.display = 'block';
+      }
+    } catch (err) {
+      alert(err);
+    }
+  });
+}
+// Update Login button in mobile and desktop to open popup
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('a[href="login.html"], .menu-item-action[href="login.html"]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openLoginPopup();
+    });
+  });
+});
+document.getElementById('showPassword').addEventListener('change', function() {
+  var pwd = document.getElementById('modalLoginPassword');
+  pwd.type = this.checked ? 'text' : 'password';
+});
+</script>
+<!--script src="main.js"></script-->
+</body>
+</html>

@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maxon - On-Site Medical Camp Organization</title>
+    <link rel="icon" type="image/png" href="maxonlogo.png">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Three.js for 3D functionalities -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls for 3D map interaction -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      html, body {
+        height: 100%;
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .menu-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-weight: bold;
+          color: #333;
+          text-decoration: none;
+      }
+
+      .menu-item i {
+        font-size: 20px;
+        color: #667eea;
+      }
+
+      main {
+        flex: 1 0 auto;
+        padding-bottom: 60px; /* Add padding to prevent overlap with fixed footer */
+      }
+      footer {
+        flex-shrink: 0;
+      }
+
+      #header_div {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 100px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 0 24px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1001;
+        transition: height 0.3s cubic-bezier(0.4,0,0.2,1), padding 0.3s cubic-bezier(0.4,0,0.2,1);
+      }
+      #header_div_left {
+        display: flex;
+        align-items: center;
+        height: 100px;
+        transition: height 0.3s cubic-bezier(0.4,0,0.2,1);
+      }
+      #header_div_left img {
+        height: 72px;
+        width: auto;
+        max-width: 120px;
+        min-width: 60px;
+        object-fit: contain;
+        cursor: pointer;
+        margin-right: 20px;
+        transition: height 0.3s cubic-bezier(0.4,0,0.2,1), max-width 0.3s cubic-bezier(0.4,0,0.2,1);
+      }
+      #header_div_left img:hover {
+        transform: scale(1.05);
+      }
+      #header_div_right {
+        flex: 1 1 0%;
+        min-width: 0;
+        height: 100px;
+        display: flex;
+        align-items: center;
+        background: transparent;
+        overflow-x: auto;
+      }
+      #header_div_right ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 25px;
+        font-size: 18px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        width: 100%;
+        justify-content: flex-start;
+        align-items: center;
+      }
+      #header_div_right ul li a {
+        text-decoration: none;
+        color: #2c3e50;
+        font-weight: 600;
+        padding: 10px 0;
+        transition: color 0.3s, transform 0.3s;
+        position: relative;
+      }
+      #header_div_right ul li a:hover {
+        color: #0082c6;
+        transform: translateY(-2px);
+      }
+      .header_button {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        margin-left: auto;
+        height: 100px;
+      }
+      .header_button ul {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 15px 0 0;
+        gap: 15px;
+        list-style: none;
+        padding: 0;
+      }
+      .header_button ul li a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        color: #0082c6;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 20px;
+        transition: all 0.3s;
+      }
+      .header_button ul li a:hover {
+        color: #ee8ce3;
+        background: rgba(0, 130, 198, 0.1);
+        transform: translateY(-2px);
+      }
+      .header_button ul li a img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+        transition: transform 0.3s;
+      }
+      .header_button ul li a:hover img {
+        transform: scale(1.1);
+      }
+      .header_button ul li a span {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      @media (max-width: 1024px) {
+        #header_div {
+          flex-direction: column;
+          height: auto;
+          padding: 8px 4px;
+        }
+        #header_div_left, #header_div_right, .header_button {
+          width: 100%;
+          justify-content: center;
+          margin-bottom: 8px;
+          height: auto;
+        }
+        #header_div_left img {
+          height: 56px !important;
+          max-width: 90px !important;
+        }
+        #header_div.header-shrink #header_div_left img {
+          height: 32px !important;
+          max-width: 50px !important;
+        }
+      }
+      @media (max-width: 768px) {
+        #header_div {
+          flex-direction: column;
+          height: auto;
+          padding: 4px 2px;
+        }
+        #header_div_left, #header_div_right, .header_button {
+          width: 100%;
+          justify-content: center;
+          margin-bottom: 6px;
+          height: auto;
+        }
+        #header_div_left img {
+          height: 40px !important;
+          max-width: 60px !important;
+        }
+        #header_div.header-shrink #header_div_left img {
+          height: 24px !important;
+          max-width: 36px !important;
+        }
+        #header_div_right ul {
+          gap: 10px !important;
+          font-size: 14px !important;
+        }
+      }
+      footer a {
+        text-decoration: none !important;
+      }
+      .hero-glass-bg {
+        background: linear-gradient(120deg, rgba(0, 180, 216, 0.35) 0%, rgba(0, 119, 182, 0.25) 100%), rgba(30, 60, 90, 0.55) !important;
+        border-radius: 22px !important;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+        padding: 22px 18px 18px 18px !important;
+        transition: background 0.4s, box-shadow 0.4s;
+      }
+      /* Animation for hero text */
+      .hero-animate {
+        opacity: 0;
+        transform: translateY(40px) scale(0.98);
+        transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1), transform 0.7s cubic-bezier(0.4,0,0.2,1);
+      }
+      .hero-animate.in-view {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      .hero-animate.out-view {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.98);
+      }
+      @media (max-width: 900px) {
+        /* Removed min-height: 100vh and height: 100vh for #home and #home-slideshow-bg to fix mobile white space */
+        #home {
+          padding-bottom: 0 !important;
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: flex-end !important;
+        }
+        #home-slideshow-bg {
+          display: flex !important;
+          flex-direction: column !important;
+          justify-content: flex-end !important;
+        }
+        .flex.flex-col.items-center.justify-end.w-full.h-full.md\:hidden.absolute.left-0.right-0.bottom-0.z-10.p-2 {
+          position: static !important;
+          height: auto !important;
+          min-height: 0 !important;
+          padding-bottom: 32px !important;
+        }
+        .slideshow-img {
+          max-height: 110px !important;
+          height: 110px !important;
+          width: auto !important;
+          object-fit: contain !important;
+          margin: 0 auto 12px auto !important;
+          display: block !important;
+        }
+        .slideshow-img.hidden {
+          display: none !important;
+        }
+      }
+      .slideshow-img {
+        opacity: 0;
+        transition: opacity 0.7s cubic-bezier(0.4,0,0.2,1);
+        pointer-events: none;
+        z-index: 0;
+      }
+      .slideshow-img.active {
+        opacity: 1;
+        pointer-events: auto;
+        z-index: 1;
+      }
+      /* Smooth Slideshow Animation like Medall */
+      .slideshow-img {
+        opacity: 0;
+        transition: opacity 1.5s ease-in-out;
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 0;
+      }
+     
+      
+      .slideshow-img.active {
+        opacity: 1;
+        z-index: 1;
+      }
+      
+      .slideshow-img.fade-out {
+        opacity: 0;
+        z-index: 0;
+      }
+      
+      /* Container styling */
+      #home-slideshow-bg {
+        overflow: hidden;
+        position: relative;
+      }
+      
+      /* Mobile specific adjustments */
+      @media (max-width: 768px) {
+        .slideshow-img {
+          object-fit: contain;
+        }
+      }
+      .hero-gradient-overlay {
+        background: linear-gradient(120deg, rgba(0, 40, 80, 0.45) 0%, rgba(0, 119, 182, 0.25) 100%);
+        pointer-events: none;
+      }
+      .hero-gradient-overlay .hero-glass-bg {
+        pointer-events: auto;
+        background: rgba(255,255,255,0.18);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1.5px solid rgba(255,255,255,0.25);
+      }
+      .pop-animate {
+        animation: popInHero 0.6s cubic-bezier(0.4,0,0.2,1);
+      }
+      @keyframes popInHero {
+        0% { opacity: 0.2; transform: scale(0.92) translateY(40px); }
+        60% { opacity: 1; transform: scale(1.04) translateY(-8px); }
+        100% { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      #hello {
+          top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+      }
+      #hello .img_ {
+        top: 0; left: 0;
+        /* Do NOT set width or height here! */
+        opacity: 0;
+        transition: opacity 1s;
+        z-index: 1;
+      }
+      #hello .img_.active {
+        opacity: 1;
+        z-index: 2;
+      }
+    </style>
+</head>
+<body class="text-gray-800" style="margin: 0; font-family: Arial,sans-serif">
+ <header id="header_div" class="pc-header"style="height: 100px">
+  <div id="header_div_left">
+    <img src="maxonlogo.png" alt="Logo">
+  </div>
+  <div id="header_div_right">
+    <ul class="menu-animate">
+      <li><a href="#he">Home</a></li>
+      <li><a href="gallery">Our Gallery</a></li>
+      <li><a href="#about">About Us</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#why-choose-us">Why Us?</a></li>
+      <li><a href="#certifications">Certifications</a></li>
+      <li><a href="#impact">Impact</a></li>
+      <li><a href="#india-map-section">Our Reach</a></li>
+    </ul>
+  </div>
+  <div class="header_button">
+    <ul class="menu-animate-right">
+      <li onclick="openBookingPopup()">
+        <a href="#"><img src="Icons/Book_a_Test.png" alt="Book_a_test"><span>Book A Test</span></a>
+      </li>
+      <li><a href="#contact"><img src="Icons/ContactUs.png" alt="Contact_Us"><span>Contact Us</span></a></li>
+      <li><a href="login.html"><img src="Icons/Login.png" alt="Login"><span>Login</span></a></li>
+    </ul>
+  </div>
+</header>
+
+
+<!-- Mobile Header (visible ≤900px) -->
+<header class="mobile-header">
+  <div class="mobile-header-bar" id="mobile-header-bar">
+    <img src="maxonlogo.png" class="mobile-logo" alt="Logo">
+    <div class="mobile-actions-horizontal">
+    <a href="login.html" class="menu-item-action">
+      <img src="Icons/Login.png" alt="Login" style="width:20px; height:20px;">
+      <span>Login</span>
+    </a>
+    <a href="#" class="menu-item-action" onclick="openBookingPopup(); return false;">
+      <img src="Icons/Book_a_Test.png" alt="Book_a_test" style="width:20px; height:20px;">
+      <span>Book A Test</span>
+    </a>
+    <a href="#contact" class="menu-item-action">
+      <img src="Icons/ContactUs.png" alt="Contact_Us" style="width: 20px; height: 20px;">
+      <span>Contact Us</span>
+    </a>
+      <button class="mobile-hamburger" id="mobile-hamburger" aria-label="Open menu" aria-expanded="false" type="button">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+/* Hide PC header on mobile, show on desktop/tablet */
+.pc-header { display: block; }
+@media (max-width: 900px) {
+  .pc-header { display: none !important; }
+}
+/* Hide mobile header on desktop/tablet, show on mobile */
+.mobile-header { display: none; }
+@media (max-width: 900px) {
+  .mobile-header {
+    display: block !important;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: height 0.3s, background 0.3s;
+  }
+  .mobile-header.mobile-header-shrink {
+    height: 48px !important;
+    background: rgba(255,255,255,0.1) !important;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .mobile-header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 8px;
+    height: 70px;
+    transition: height 0.3s;
+    background: transparent;
+  }
+  .mobile-header.mobile-header-shrink .mobile-header-bar {
+    height: 48px;
+  }
+  .mobile-logo {
+    height: 40px;
+    max-width: 60px;
+    min-width: 40px;
+    object-fit: contain;
+    margin-right: 10px;
+    transition: height 0.3s, max-width 0.3s;
+  }
+  .mobile-header.mobile-header-shrink .mobile-logo {
+    height: 28px;
+    max-width: 36px;
+  }
+  .mobile-menu-horizontal {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    margin-left: 8px;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  .mobile-header.mobile-header-shrink .mobile-menu-horizontal {
+    opacity: 0;
+    visibility: hidden;
+    width: 0;
+    min-width: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+  .mobile-menu-list-horizontal {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    align-items: center;
+  }
+  .mobile-menu-list-horizontal li a {
+    display: block;
+    padding: 8px 6px;
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  .mobile-menu-list-horizontal li a:hover {
+    background: #f0f8ff;
+    color: #0082c6;
+  }
+  .mobile-actions-horizontal {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    padding-right: 8px;
+    margin-top: 0;
+  }
+  .menu-item-action {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    min-height: 28px;
+  }
+  .menu-item-action img {
+    width: 16px !important;
+    height: 16px !important;
+    transition: transform 0.2s;
+  }
+  .menu-item-action:hover, .menu-item-action:focus {
+    background: #e3f0ff;
+    color: #0082c6;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+  }
+  .menu-item-action:hover img, .menu-item-action:focus img {
+    transform: scale(1.08);
+  }
+  .mobile-hamburger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    margin-left: 2px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 20001;
+    padding: 0;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .mobile-hamburger span {
+    height: 3px;
+    width: 22px;
+    background: #0082c6;
+    margin: 2px 0;
+    border-radius: 2px;
+    display: block;
+    transition: 0.3s;
+  }
+  .mobile-hamburger:hover, .mobile-hamburger:focus {
+    background: #e3f0ff;
+  }
+  .mobile-drawer-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 0;
+    background: #fff;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    z-index: 30000;
+    flex-direction: column;
+    padding: 0 0 0 0;
+    transition: height 0.35s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s;
+    overflow: hidden;
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  .mobile-drawer-menu.open {
+    display: flex;
+    height: 320px;
+    padding: 32px 16px 16px 16px;
+    transform: translateY(0);
+    opacity: 1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  }
+  .mobile-drawer-menu .drawer-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #667eea;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+  }
+  .mobile-drawer-menu .drawer-close:hover, .mobile-drawer-menu .drawer-close:focus {
+    background: #e3f0ff;
+  }
+  .mobile-drawer-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 32px;
+  }
+  .mobile-drawer-menu ul li a {
+    color: #333;
+    font-weight: bold;
+    font-size: 1.05rem;
+    text-decoration: none;
+    padding: 7px 0 7px 8px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    display: block;
+  }
+  .mobile-drawer-menu ul li a:hover, .mobile-drawer-menu ul li a:focus {
+    background: #f0f8ff;
+    color: #0082c6;
+    box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+  }
+  .mobile-drawer-menu-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.18);
+    z-index: 29999;
+  }
+  .mobile-drawer-menu.open ~ .mobile-drawer-menu-backdrop {
+    display: block;
+  }
+  @media (max-width: 900px) {
+    /* ...existing styles... */
+    .mobile-drawer-menu ul li {
+      opacity: 0;
+      transform: translateY(-24px);
+      transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .mobile-drawer-menu.open ul li {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .slideshow-img.hidden {
+      display: none !important;
+    }
+  }
+}
+@media (min-width: 901px) {
+  .mobile-header { display: none !important; }
+  .mobile-drawer-menu,
+  .mobile-drawer-menu-backdrop {
+    display: none !important;
+  }
+}
+@media (max-width: 500px) {
+  #loginFormContainer {
+    border-radius: 7px !important;
+    padding: 14px 4px 10px 4px !important;
+    width: 99vw !important;
+    max-width: 99vw !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  #loginCloseBtn {
+    top: 4px !important;
+    right: 6px !important;
+    font-size: 1.6rem !important;
+    padding: 0 4px !important;
+  }
+  ul {
+    list-style: none;
+    padding-left: 0;
+  }
+}
+</style>
+<script>
+// Mobile header shrink and transparent on scroll up, hide menu in shrink state
+(function() {
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+  const mobileHeader = document.querySelector('.mobile-header');
+  function onScroll() {
+    if (!mobileHeader) return;
+    if (window.scrollY > 20 && window.scrollY < lastScrollY) {
+      // Scrolling up
+      mobileHeader.classList.add('mobile-header-shrink');
+    } else if (window.scrollY <= 20) {
+      mobileHeader.classList.remove('mobile-header-shrink');
+    } else if (window.scrollY > lastScrollY) {
+      // Scrolling down
+      mobileHeader.classList.remove('mobile-header-shrink');
+    }
+    lastScrollY = window.scrollY;
+    ticking = false;
+  }
+window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(onScroll);
+      ticking = true;
+    }
+  });
+})();
+</script>
+
+<!-- Shared Modal Overlay -->
+<div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,40,60,0.35); backdrop-filter: blur(2px); z-index:999; transition:opacity 0.3s;"></div>
+
+<!-- Booking Popup -->
+<div id="bookingPopup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: transparent; z-index: 2001;">
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #667eea;">
+            <h2 style="font-size: 24px; font-weight: bold; color: #667eea; margin: 0;">Book a Test</h2>
+            <button onclick="closeBookingPopup()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+        </div>
+        <form id="bookingForm">
+            <!-- Customer Type Selection -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Customer Type</label>
+                <select id="customerType" onchange="toggleFormFields()" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+                    <option value="">Select customer type</option>
+                    <option value="individual">Individual</option>
+                    <option value="organization">Organization</option>
+                </select>
+            </div>
+            <!-- Individual Form Fields -->
+            <div id="individualFields" style="display: none;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Full Name</label>
+                    <input type="text" id="individualName" placeholder="Enter your full name" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Phone Number</label>
+                    <input type="tel" id="individualPhone" placeholder="Enter your phone number" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Age</label>
+                    <input type="number" id="individualAge" placeholder="Enter your age" min="1" max="120" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+                </div>
+            </div>
+            <!-- Organization Form Fields-->
+            <div id="organizationFields" style="display: none;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Company Name</label>
+                    <input type="text" id="companyName" placeholder="Enter company name" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Company Size</label>
+                    <select id="companySize" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+                        <option value="">Select company size</option>
+                        <option value="1-50">1-50 employees</option>
+                        <option value="51-200">51-200 employees</option>
+                        <option value="201-500">201-500 employees</option>
+                        <option value="501-1000">501-1000 employees</option>
+                        <option value="1000+">1000+ employees</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;">
+                  <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Name</label>
+                  <input type="text" id="cname" placeholder="Enter your designation" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+              </div>
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Designation</label>
+                    <input type="text" id="designation" placeholder="Enter your designation" style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box;">
+                </div>
+            </div>
+            <!-- Services Section (Common for both) -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Select Services</label>
+                <div style="max-height: 200px; overflow-y: auto; border: 2px solid #e1e5e9; border-radius: 8px; padding: 10px;">
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <input type="checkbox" id="labTest" value="lab" style="margin-right: 10px;">
+                        <span style="flex: 1;">Laboratory Tests</span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <input type="checkbox" id="xray" value="xray" style="margin-right: 10px;">
+                        <span style="flex: 1;">Mobile Digital X-Ray</span>
+                    </div>
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <input type="checkbox" id="ecg" value="ecg" style="margin-right: 10px;">
+                        <span style="flex: 1;">Computerized ECG</span>
+                    </div>
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <input type="checkbox" id="echo" value="echo" style="margin-right: 10px;">
+                        <span style="flex: 1;">2D Echo Services</span>
+                    </div>
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <input type="checkbox" id="firstAid" value="firstaid" style="margin-right: 10px;">
+                        <span style="flex: 1;">First Aid Training</span>
+                    </div>
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <input type="checkbox" id="audiometry" value="audiometry" style="margin-right: 10px;">
+                        <span style="flex: 1;">Audiometry & Vision Testing</span>
+                    </div>
+                    <div style="display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0;">
+                        <input type="checkbox" id="vaccination" value="vaccination" style="margin-right: 10px;">
+                        <span style="flex: 1;">Vaccination Services</span>
+                    </div>
+                    <div style="display: flex; align-items: center; padding: 8px;">
+                        <input type="checkbox" id="pft" value="pft" style="margin-right: 10px;">
+                        <span style="flex: 1;">Pulmonary Function Test</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Query Message -->
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Additional Query/Message</label>
+                <textarea id="queryMessage" placeholder="Enter any additional queries or special requirements..." style="width: 100%; padding: 12px; border: 2px solid #e1e5e9; border-radius: 8px; font-size: 16px; transition: border-color 0.3s ease; box-sizing: border-box; resize: vertical; min-height: 100px;"></textarea>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 15px 30px; border-radius: 25px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; transition: transform 0.3s ease;">Submit Booking Request</button>
+        </form>
+    </div>
+</div>
+ <script>
+// Open booking popup
+function forceBookingButtonReset() {
+    document.querySelectorAll('button[type="submit"]').forEach(btn => {
+        btn.textContent = 'Submit Booking Request';
+        btn.disabled = false;
+    });
+}
+
+function openBookingPopup() {
+    document.getElementById('bookingPopup').style.display = 'block';
+    forceBookingButtonReset();
+}
+
+function closeBookingPopup() {
+    document.getElementById('bookingPopup').style.display = 'none';
+    resetForm();
+    forceBookingButtonReset();
+}
+
+// Toggle form fields based on customer type
+function toggleFormFields() {
+    const customerType = document.getElementById('customerType').value;
+    const individualFields = document.getElementById('individualFields');
+    const organizationFields = document.getElementById('organizationFields');
+
+    if (customerType === 'individual') {
+        individualFields.style.display = 'block';
+        organizationFields.style.display = 'none';
+    } else if (customerType === 'organization') {
+        individualFields.style.display = 'none';
+        organizationFields.style.display = 'block';
+    } else {
+        individualFields.style.display = 'none';
+        organizationFields.style.display = 'none';
+    }
+}
+
+// Reset form
+function resetForm() {
+    document.getElementById('bookingForm').reset();
+    document.getElementById('individualFields').style.display = 'none';
+    document.getElementById('organizationFields').style.display = 'none';
+    forceBookingButtonReset();
+}
+
+// Handle form submission
+document.getElementById('bookingForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const customerType = document.getElementById('customerType').value;
+    let formData = {
+        customerType: customerType,
+        services: [],
+        queryMessage: document.getElementById('queryMessage').value,
+        timestamp: new Date().toISOString(),
+        status: 'pending'
+    };
+
+    // Get selected services
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    checkboxes.forEach(checkbox => {
+        formData.services.push(checkbox.value);
+    });
+
+    // Add customer-specific data
+    if (customerType === 'individual') {
+        formData.name = document.getElementById('individualName').value;
+        formData.phone = document.getElementById('individualPhone').value;
+        formData.age = document.getElementById('individualAge').value;
+    } else if (customerType === 'organization') {
+        formData.companyName = document.getElementById('companyName').value;
+        formData.companySize = document.getElementById('companySize').value;
+        formData.designation = document.getElementById('designation').value;
+    }
+
+    // Validate form
+    if (!customerType) {
+        alert('Please select customer type');
+        return;
+    }
+
+    if (formData.services.length === 0) {
+        alert('Please select at least one service');
+        return;
+    }
+
+    // Additional detailed validation
+    function isNonEmpty(str) {
+        return typeof str === 'string' && str.trim().length > 0;
+    }
+
+    if (
+        (formData.customerType === 'individual' &&
+            isNonEmpty(formData.name) &&
+            isNonEmpty(formData.phone) &&
+            isNonEmpty(formData.age) &&
+            formData.services.length > 0) ||
+        (formData.customerType === 'organization' &&
+            isNonEmpty(formData.companyName) &&
+            isNonEmpty(formData.companySize) &&
+            isNonEmpty(formData.designation) &&
+            formData.services.length > 0)
+    ) {
+        // Continue with submission
+    } else {
+        alert('Please fill in all the required fields');
+        return;
+    }
+
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = 'Submitting...';
+    submitBtn.disabled = true;
+
+    try {
+        // Send data to backend
+        const response = await fetch('/booking', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+
+        if (response.ok) {
+            const result = await response.json();
+            alert('Booking request submitted successfully,We will contact you soon.');
+            closeBookingPopup();
+        } else {
+            throw new Error('Failed to submit booking');
+        }
+    } catch (error) {
+        console.error('Error submitting booking:', error);
+        alert('Sorry, there was an error submitting your booking. Please try again or contact us directly.');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+    }
+});
+
+// Close popup when clicking outside
+document.getElementById('bookingPopup').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeBookingPopup();
+    }
+});
+</script>
+
+<!-- Login Modal (Landscape for Desktop) >
+
+<div id="loginPopup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40" style="display:none;">
+  <div class="login-landscape-container bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row w-full max-w-3xl mx-auto relative">
+    < Logo Side >
+    <div class="login-logo-side flex flex-col items-center justify-center p-8 md:border-r-2 border-[#c23ca3] bg-white">
+      <img src="maxonlogo.png" alt="Maxon Healthcare Logo" class="w-48 h-48 object-contain mb-4">
+    </div>
+    < Form Side >
+    <div class="login-form-side flex flex-col justify-center p-8 w-full">
+      <button onclick="closeLoginPopup()" class="close-btn" aria-label="Close">&times;</button>
+      <h2 class="text-2xl md:text-3xl font-bold text-blue-800 mb-6 text-center md:text-left">Sign In to Maxon Healthcare</h2>
+      <form id="modalLoginForm" class="space-y-6">
+        <div>
+          <label for="modalLoginEmail" class="block text-blue-900 font-semibold mb-1">Username</label>
+          <input id="modalLoginEmail" name="username" type="text" required placeholder="Enter your username" class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 text-lg">
+        </div>
+        <div>
+          <label for="modalLoginPassword" class="block text-blue-900 font-semibold mb-1">Password</label>
+          <input id="modalLoginPassword" name="password" type="password" required placeholder="Enter your password" class="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 text-lg">
+        </div>
+        <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold text-lg shadow-lg hover:from-blue-600 hover:to-blue-800 transition">Sign In</button>
+      </form>
+      <a href="#" class="block mt-4 text-blue-700 hover:underline text-center">Forget Password</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// Open login popup
+function openLoginPopup() {
+    document.getElementById('loginPopup').style.display = 'block';
+    // Optionally, add overlay if you want
+}
+// Close login popup
+function closeLoginPopup() {
+    document.getElementById('loginPopup').style.display = 'none';
+    document.getElementById('modalLoginForm').reset();
+    document.getElementById('modalLoginError').style.display = 'none';
+}
+// Dismiss login popup when clicking outside or pressing Escape
+(function() {
+  const loginPopup = document.getElementById('loginPopup');
+  const loginFormContainer = document.getElementById('loginFormContainer');
+  if (loginPopup && loginFormContainer) {
+    loginPopup.addEventListener('click', function(e) {
+      if (e.target === loginPopup) closeLoginPopup();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (loginPopup.style.display === 'block' && (e.key === 'Escape' || e.keyCode === 27)) closeLoginPopup();
+    });
+  }
+})();
+// Login validation logic
+const modalLoginForm = document.getElementById('modalLoginForm');
+if (modalLoginForm) {
+  modalLoginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = document.getElementById('modalLoginEmail').value.trim();
+    const password = document.getElementById('modalLoginPassword').value;
+
+    if (!name || !password) {
+      alert('Please enter both username and password.');
+      return;
+    }
+
+    try {
+        let username_;
+        let password_;
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, password })
+      });
+
+      if (response.ok) {
+        // Save user data to localStorage for dashboard authentication
+        localStorage.setItem('userData', JSON.stringify({ name, password }));
+        window.location.href = 'dashboard.html';
+      } else {
+        alert('Wrong username or password');
+        document.getElementById('modalLoginError').textContent = 'Invalid username or password';
+        document.getElementById('modalLoginError').style.display = 'block';
+      }
+    } catch (err) {
+      alert(err);
+    }
+  });
+}
+// Update Login button in mobile and desktop to open popup
+// (You may need to update selectors if you have multiple login triggers)
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('a[href="login.html"], .menu-item-action[href="login.html"]').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      openLoginPopup();
+    });
+  });
+});
+</script>
+
+        </div>
+    </header>
+    <main style="visibility: visible" >
+        < Hero Section -->
+        <section id="he" class="nothing" style="height: auto">
+            <!-- Slideshow Images as Fullscreen Background -->
+            <div id="hello" class="hi" style="top: 0; left: 0; width: 100%; height: auto;">
+              <img src="Images/ONSITE MEDICAL Camp SERvices.png" alt="Onsite Medical Camp Services" class="img_" style="width:100%;height:500px;">
+              <img src="Images/NABL%20Accriditation_1.png" alt="NABL Accreditation" class="img_" style="width:100%;height:500px;">
+              <img src="Images/CMC_1.png" alt="CMC" class="img_" style="width:100%;height:500px;">
+
+            </div>
+            <!--div id="slideshow-dots" class="bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20"></div=-->
+            <style>
+            #hello {
+                top: 0; left: 0; width: 100%; height: 100%;
+            }
+            #hello .img_ {
+              top: 0; left: 0;
+              /* Do NOT set width or height here! */
+              opacity: 0;
+              transition: opacity 1s;
+            }
+            #hello .img_.active {
+              opacity: 1;
+            }
+            </style>
+            <script>
+                //alert(document.getElementById('header_div').style.height.toString());
+            (function() {
+            document.getElementById('he').style.marginTop = document.getElementById('header_div').style.height;
+
+                if(window.innerWidth <= 700){
+                    document.getElementsByClassName('img_')[0].style.height = '300px';
+                    document.getElementsByClassName('img_')[1].style.height = '300px';
+                    document.getElementsByClassName('img_')[2].style.height = '300px';
+                    document.getElementById('he').style.height = '300px';
+
+                }else {
+                    document.getElementsByClassName('img_')[0].style.height = '600px';
+                    document.getElementsByClassName('img_')[1].style.height = '600px';
+                    document.getElementsByClassName('img_')[2].style.height = '600px';
+                    document.getElementById('he').style.height = '6000px';
+                }
+              var slides = document.querySelectorAll('#hello .img_');
+              var class1 = document.querySelector('.class1');
+              var current = 0;
+              var timer;
+              if (!slides.length || !class1) return;
+              slides[0].classList.add('active');
+
+              function animateClass1(anim) {
+                class1.classList.remove('fadein', 'fadeout');
+                void class1.offsetWidth;
+                class1.classList.add(anim);
+                setTimeout(function() {
+                  class1.classList.remove(anim);
+                }, 1000);
+              }
+
+              function showSlide(idx) {
+                slides[current].classList.remove('active');
+                animateClass1('fadeout');
+                setTimeout(function() {
+                  current = (idx + slides.length) % slides.length;
+                  slides[current].classList.add('active');
+                  animateClass1('fadein');
+                }, 500);
+              }
+
+              function nextSlide() {
+                showSlide(current + 1);
+              }
+              function prevSlide() {
+                showSlide(current - 1);
+              }
+
+              function startAuto() {
+                timer = setInterval(nextSlide, 3500);
+              }
+              function stopAuto() {
+                clearInterval(timer);
+              }
+              startAuto();
+
+              var nextBtn = document.getElementById('slideNext');
+              var prevBtn = document.getElementById('slidePrev');
+              if (nextBtn && prevBtn) {
+                nextBtn.onclick = function() {
+                  stopAuto();
+                  nextSlide();
+                  startAuto();
+                };
+                prevBtn.onclick = function() {
+                  stopAuto();
+                  prevSlide();
+                  startAuto();
+                };
+              }
+
+              animateClass1('fadein');
+            })();
+            </script>
+              
+            <!-- Slideshow Navigation (arrows and dots) -->
+            <button id="slideshow-prev" class="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-60 hover:bg-opacity-90 text-blue-900 rounded-full p-3 shadow transition-all duration-200 z-20"><i class="fas fa-chevron-left"></i></button>
+            <button id="slideshow-next" class="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-60 hover:bg-opacity-90 text-blue-900 rounded-full p-3 shadow transition-all duration-200 z-20"><i class="fas fa-chevron-right"></i></button>
+            <!-- Removed slideshow-dots circles here -->
+
+        </section>
+<!--
+  <section style="background: linear-gradient(120deg, #0093d3 0%, #b84fa7 100%); padding: 0; width: 100%;">
+  <div class="class1 fadeup-section" style="width: 100%; min-height: 350px; background: #fff; border-radius: 0; box-shadow: 0 4px 24px rgba(0,0,0,0.10); padding: 48px 0 40px 0; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(40px); transition: opacity 0.4s cubic-bezier(.4,0,.2,1), transform 0.3s cubic-bezier(.4,0,.2,1);">
+    <div class="class3" style="text-align: center; margin-bottom: 28px;">
+      <h1 class="class4" style="
+        font-size: 2.7rem;
+        color: #016bbc;
+        /*background: #b84fa7;*/
+        padding: 18px 38px;
+        border-radius: 20px;
+        box-shadow: 0 0 32px 8px #ee8ce3, 0 2px 8px rgba(184,79,167,0.10);
+        margin-bottom: 18px;
+        text-shadow: 0 0 16px #fff, 0 0 8px #a1c4ff, 2px 2px 8px #0093d3;
+        font-weight: bold;
+        transition: box-shadow 0.3s, text-shadow 0.3s;
+        top: 0;
+      ">
+        Empowering Health, Right Where You Are.
+      </h1>
+      <p class="class5" style="font-size: 1.25rem; color: #444; margin-top: 18px;">
+        State of the art <b style="color: #3dabd3;">On-Site</b> medical camps for a healthier workforce
+      </p>
+    </div>
+  -->
+    <ul style="list-style: none; padding: 0; margin: 0 0 28px 0; text-align: center;">
+      <li style="display: inline-flex; align-items: center; margin: 0 16px; color: #0093d3; font-size: 1rem;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #b84fa7; margin-right: 10px; box-shadow: 0 2px 8px rgba(184,79,167,0.15);">
+          <svg class="tick-svg" width="18" height="18" viewBox="0 0 18 18">
+            <polyline points="4,10 8,14 14,6" style="fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16;stroke-dashoffset:16;transition:stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1);" />
+          </svg>
+        </span>
+        Certified Medical Staff
+      </li>
+      <li style="display: inline-flex; align-items: center; margin: 0 16px; color: #0093d3; font-size: 1rem;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #b84fa7; margin-right: 10px; box-shadow: 0 2px 8px rgba(184,79,167,0.15);">
+          <svg class="tick-svg" width="18" height="18" viewBox="0 0 18 18">
+            <polyline points="4,10 8,14 14,6" style="fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16;stroke-dashoffset:16;transition:stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1);" />
+          </svg>
+        </span>
+        Modern Equipment
+      </li>
+      <li style="display: inline-flex; align-items: center; margin: 0 16px; color: #0093d3; font-size: 1rem;">
+        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #b84fa7; margin-right: 10px; box-shadow: 0 2px 8px rgba(184,79,167,0.15);">
+          <svg class="tick-svg" width="18" height="18" viewBox="0 0 18 18">
+            <polyline points="4,10 8,14 14,6" style="fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16;stroke-dashoffset:16;transition:stroke-dashoffset 0.6s cubic-bezier(.4,0,.2,1);" />
+          </svg>
+        </span>
+        Flexible Scheduling
+      </li>
+    </ul>
+    <div style="text-align: center;">
+      <a href="#services" class="hh animated-btn"
+         style="background: #25bd42; color: #fff; padding: 16px 44px; border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 1.1rem; box-shadow: 0 2px 8px rgba(184,79,167,0.15); transition: background 0.2s, transform 0.2s, box-shadow 0.2s; opacity: 0; transform: translateY(30px); animation: fadeInUp 1s forwards 0.3s;">
+        Discover Our Solutions
+      </a>
+    </div>
+    <style>
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animated-btn:hover {
+        background: #ee8ce3;
+        color: #fff;
+        transform: scale(1.07) translateY(-2px);
+        box-shadow: 0 6px 24px rgba(184,79,167,0.25);
+        text-decoration: none;
+      }
+      .animated-btn:active {
+        background: #a03a8c;
+        transform: scale(0.98);
+      }
+      .class4:hover {
+        box-shadow: 0 0 48px 16px #ee8ce3, 0 2px 8px rgba(184,79,167,0.20);
+        text-shadow: 0 0 32px #fff, 0 0 16px #b84fa7, 2px 2px 12px #0093d3;
+      }
+    </style>
+      <style>
+@keyframes fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes fadeout {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+.class1.fadein {
+  animation: fadein 1s;
+}
+.class1.fadeout {
+  animation: fadeout 1s;
+}
+</style>
+  </div>
+  <script>
+    // Fade-up animation for .class1
+    function onScrollFadeUp() {
+      var section = document.querySelector('.fadeup-section');
+      if (!section) return;
+      var rect = section.getBoundingClientRect();
+      if (rect.top < window.innerHeight - 100) {
+        section.style.opacity = 1;
+        section.style.transform = 'translateY(0)';
+      }
+    }
+    window.addEventListener('scroll', onScrollFadeUp);
+    window.addEventListener('load', onScrollFadeUp);
+
+    // Tick mark animation
+    function animateTicks() {
+      document.querySelectorAll('.tick-svg polyline').forEach(function(poly) {
+        var parent = poly.closest('li');
+        var rect = parent.getBoundingClientRect();
+        if (rect.top < window.innerHeight - 100) {
+          poly.style.strokeDashoffset = 0;
+        }
+      });
+    }
+    window.addEventListener('scroll', animateTicks);
+    window.addEventListener('load', animateTicks);
+  </script>
+</section>
+        <!-- Full Image Gallery Section -->
+        <section id="home-gallery" class="pt-20 pb-12 bg-white section-fade-in">
+          <div class="container mx-auto px-4 pt-1">
+                <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-10 animated-element">Our Medical Camp Gallery</h2>
+                <!-- Desktop grid (unchanged) -->
+                <div class="gallery-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <img src="Camp/Amar%20raja%20battries.png" alt="Amar_Raja_Battries" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Bharath%20Petrolieum.png" alt="Bharath_Petrolieum" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Cement%20Factories.png" alt="Cement_Factories" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Cocacola.png" alt="Cocacloa" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Hamilton.png" alt="Hamilton" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Hetero.png" alt="Hetro" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Kajaria%20ceramics.png" alt="Kajaria_Ceramics" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/LG.png" alt="LG" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Mondeleze.png" alt="MOndeleze" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Mother%20dairy.png" alt="Mother_Dairy" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Ms%20Agarwal.png" alt="Ms_Agarwal" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Patanjali.png" alt="Patanjali" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/PFI.png" alt="PFI" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Rockman.png" alt="Rockman" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/Ultramarine.png" alt="Ultramarine" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                    <img src="Camp/sikof.png" alt="Pre-Employment & Periodical Health Checks" class="rounded-xl shadow-lg w-full h-64 object-cover gallery-img animated-element gallery-img-pop">
+                </div>
+                <!-- Mobile carousels (hidden on desktop) -->
+                <div class="gallery-carousel-1 flex gap-4 overflow-hidden mt-6 md:hidden">
+                    <img src="Camp/Amar%20raja%20battries.png" alt="Amar_Raja_Battries" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Bharath%20Petrolieum.png" alt="Bharath_Petrolieum" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Cement%20Factories.png" alt="Cement_Factories" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Cocacola.png" alt="Cocacloa" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Hamilton.png" alt="Hamilton" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Hetero.png" alt="Hetro" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Kajaria%20ceramics.png" alt="Kajaria_Ceramics" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/LG.png" alt="LG" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                </div>
+                <div class="gallery-carousel-2 flex gap-4 overflow-hidden mt-6 md:hidden">
+                    <img src="Camp/Mondeleze.png" alt="MOndeleze" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Mother%20dairy.png" alt="Mother_Dairy" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Ms%20Agarwal.png" alt="Ms_Agarwal" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Patanjali.png" alt="Patanjali" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/PFI.png" alt="PFI" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Rockman.png" alt="Rockman" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/Ultramarine.png" alt="Ultramarine" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                    <img src="Camp/sikof.png" alt="Pre-Employment & Periodical Health Checks" class="rounded-xl shadow-lg h-40 w-auto object-cover gallery-img">
+                </div>
+            </div>
+        </section>
+
+        <!-- About Us Section -->
+        <section id="about" class="py-20 bg-white section-fade-in">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold text-blue-800 mb-12 animated-element">About Maxon Healthcare - Your Partner in Workplace Health</h2>
+                <div class="flex flex-col md:flex-row items-center gap-12 mt-8">
+                    <div class="md:w-1/2 animated-element delay-2">
+                        <img src="2024-12-26.webp" alt="Medical Team" class="rounded-2xl shadow-2xl w-full border-4 border-blue-100">
+                    </div>
+                    <div class="md:w-1/2 text-left">
+                        <p class="text-xl leading-relaxed mb-6 text-gray-700 animated-element delay-3">
+                            Maxon Healthcare is a healthcare service provider established in 2024. Maxon Healthcare is a dynamic and growing health services provider, dedicated to delivering high-quality, technology-enabled medical care through on-site medical camps, diagnostic services, and digital health solutions. Headquartered in Ongole, Andhra Pradesh, Maxon Healthcare operates with a commitment to preventive healthcare, workplace wellness, and mobile diagnostics.
+                        </p>
+                        <p class="text-xl leading-relaxed text-gray-700 animated-element delay-4">
+                            Our mission: <strong>Delivering quality healthcare onsite with precision and care.</strong><br>
+                            Our vision: <strong>Making workplace health accessible and impactful.</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="services" class="py-20 bg-gradient-to-br from-blue-50 to-blue-100 section-fade-in">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold text-blue-800 mb-14 animated-element">Our Comprehensive Medical Services</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-1" style="background-image:url('Images/laboratory tests.png');">
+                        <div class="service-content">
+                            <i class="fas fa-vial text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">Laboratory Services</h3>
+                            <p class="text-lg leading-relaxed">NABL-accredited lab services for accurate diagnostics onsite.</p>
+                        </div>
+                    </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-2" style="background-image:url('Images/Xray.png');">
+                        <div class="service-content">
+                            <i class="fas fa-x-ray text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">Mobile Digital X-Ray</h3>
+                            <p class="text-lg leading-relaxed">Portable X-ray services for quick and efficient onsite imaging.</p>
+                        </div>
+                    </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-3" style="background-image:url('Images/ECG.png');">
+                        <div class="service-content">
+                            <i class="fas fa-heartbeat text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">Computerized ECG</h3>
+                            <p class="text-lg leading-relaxed">Onsite ECG for cardiac health assessment and monitoring.</p>
+                        </div>
+                    </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-4" style="background-image:url('Images/PFT.png');">
+                        <div class="service-content">
+                            <i class="fas fa-lungs text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">Pulmonary Function Test</h3>
+                            <p class="text-lg leading-relaxed">Lung function testing for respiratory health onsite.</p>
+                        </div>
+                    </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-5" style="background-image:url('Images/A2D echo.png');">
+                        <div class="service-content">
+                            <i class="fas fa-heart text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">2D Echo</h3>
+                            <p class="text-lg leading-relaxed">Advanced cardiac imaging for comprehensive heart checkups.</p>
+                        </div>
+                    </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-6" style="background-image:url('Images/Audiometry.png');">
+                        <div class="service-content">
+                            <i class="fas fa-deaf text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">Audiometry</h3>
+                            <p class="text-lg leading-relaxed">Onsite hearing and vision tests for employee health.</p>
+                        </div>
+                    </div>
+                        <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-6"
+                             style="background-image:url('Images/Eye test.png');">
+                            <div class="service-content">
+                              <i class="fas fa-eye text-5xl mb-4"></i>
+                                <h3 class="text-2xl font-semibold mb-2">Vision Testing</h3>
+                                <p class="text-lg leading-relaxed">Onsite vision tests for employee health.</p>
+                            </div>
+                        </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-7" style="background-image:url('Images/Vaccinations.png');">
+                        <div class="service-content">
+                            <i class="fas fa-syringe text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">Vaccination Services</h3>
+                            <p class="text-lg leading-relaxed">Comprehensive vaccination programs for workplace safety.</p>
+                        </div>
+                    </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-8" style="background-image:url('Images/First aid.png');">
+                        <div class="service-content">
+                            <i class="fas fa-briefcase-medical text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">First Aid & Health Awareness Training</h3>
+                            <p class="text-lg leading-relaxed">Training programs to empower your workforce in health and safety.</p>
+                        </div>
+                    </div>
+                    <div class="service-card card-effect border-b-4 border-blue-500 animated-element delay-10" style="background-image:url('Images/pre_employemnt.png');">
+                        <div class="service-content">
+                            <i class="fas fa-user-check text-5xl mb-4"></i>
+                            <h3 class="text-2xl font-semibold mb-2">Pre-Employment & Periodical Health Checks</h3>
+                            <p class="text-lg leading-relaxed">Pre-employment, annual, and periodical medical examinations for compliance and employee well-being.</p>
+                        </div>
+                    </div>
+                    </div>
+            </div>
+        </section>
+        <!-- Why Choose Us Section -->
+        <section id="why-choose-us" class="py-20 bg-white section-fade-in">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold text-blue-800 mb-14 animated-element">Why Choose Maxon Healthcare?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+                    <div class="bg-blue-50 p-6 rounded-2xl shadow-lg card-effect animated-element delay-1">
+                        <i class="fas fa-bolt text-5xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-blue-800 mb-2">Real-time Reporting</h3>
+                        <p class="text-gray-700 text-sm">Accurate diagnostics and instant reporting for timely decisions.</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-2xl shadow-lg card-effect animated-element delay-2">
+                        <i class="fas fa-user-md text-5xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-blue-800 mb-2">Qualified Professionals</h3>
+                        <p class="text-gray-700 text-sm">Experienced and certified healthcare professionals at your service.</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-2xl shadow-lg card-effect animated-element delay-3">
+                        <i class="fas fa-cogs text-5xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-blue-800 mb-2">End-to-End Solutions</h3>
+                        <p class="text-gray-700 text-sm">Comprehensive onsite health solutions for every workplace need.</p>
+                    </div>
+                    <div class="bg-blue-50 p-6 rounded-2xl shadow-lg card-effect animated-element delay-4">
+                        <i class="fas fa-thumbs-up text-5xl text-green-600 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-blue-800 mb-2">Trusted by Clients</h3>
+                        <p class="text-gray-700 text-sm">Preferred by 200+ reputed clients for quality and reliability.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Certifications Section - NEW -->
+        <section id="certifications" class="py-20" style="background: linear-gradient(135deg, #e0e7ff 60%, #f0f7ff 100%);">
+          <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold mb-14 animated-element" style="color: #1e3a8a;">Our Accreditations & Certifications</h2>
+            <p class="text-lg text-gray-700 mb-10 max-w-2xl mx-auto animated-element delay-1">
+              Maxon Healthcare is committed to the highest standards of quality and compliance, ensuring reliable and trustworthy medical services.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+              <div class="certification-card animated-element delay-2">
+                <img src="NABL_Official_LOGO.png" alt="NABL Accreditation" class="certification-img">
+                <div class="cert-overlay">NABL Accredited: High standards of quality and precision in laboratory services.</div>
+              </div>
+              <div class="certification-card animated-element delay-3">
+                <img src="Images/ISO Logo.png" alt="ISO 9001:2015 Certification" class="certification-img">
+                <div class="cert-overlay">ISO 9001:2015 Certified: Excellence in processes and operations for reliable healthcare services.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Our Impact Section -->
+        <section id="impact" class="py-20 bg-white section-fade-in">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold text-blue-800 mb-14 animated-element">Our Impact: Healthy Communities, Thriving Workplaces</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="animated-element delay-1">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg border border-blue-100 card-effect">
+                            <i class="fas fa-hospital text-6xl text-blue-600 mb-4"></i>
+                            <div class="stat-number" data-target="300">+</div>
+                            <p class="text-xl font-semibold text-gray-700 stat-text">Medical Camps Conducted</p>
+                        </div>
+                    </div>
+                    <div class="animated-element delay-2">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg border border-blue-100 card-effect">
+                            <i class="fas fa-users text-6xl text-blue-600 mb-4"></i>
+                            <div class="stat-number" data-target="200">+</div>
+                            <p class="text-xl font-semibold text-gray-700 stat-text">Clients Served</p>
+                        </div>
+                    </div>
+                    <div class="animated-element delay-3">
+                        <div class="bg-white p-8 rounded-2xl shadow-lg border border-blue-100 card-effect">
+                            <i class="fas fa-star text-6xl text-blue-600 mb-4"></i>
+                            <div class="stat-number" data-target="99.9"></div>
+                            <p class="text-xl font-semibold text-gray-700 stat-text">% Positive Feedback</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="india-map-section" class="bg-white py-12">
+  <div class="container mx-auto px-4 text-center">
+    <h2 class="text-3xl font-bold text-blue-800 mb-6">Maxon's Nationwide Impact</h2>
+    <p class="text-gray-700 mb-10">Over <strong>200+ clients</strong> and <strong>300+ companies</strong> served. We've organized extensive medical camps across India, receiving <strong>99.9% positive feedback</strong>.</p>
+    <!--  
+    <div id="map" style="height: 60vh; width: 100%; max-width: 500px; margin: 0 auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);"></div>
+  </div>
+   -->
+  <!-- Company Info Modal for Map Selection>
+  <div id="companyInfoModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(30,40,60,0.35); backdrop-filter: blur(2px); z-index:2000; align-items:center; justify-content:center;">
+    <div class="company-info-modal-bg" style="border-radius:18px; max-width:95vw; width:400px; max-height:90vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,0.18); position:relative; padding:2.5rem 2rem 2rem 2rem;">
+      <button id="closeCompanyInfoModal" style="position:absolute; top:1.2rem; right:1.2rem; background:none; border:none; font-size:2rem; color:#a1a1aa; cursor:pointer; z-index:10;">&times;</button>
+      <div id="companyInfoContent" style="position:relative; z-index:1;">
+        <-- Dynamic content will be injected here -->
+       <!-- 
+      </div>
+    </div>
+  </div>
+ 
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet-geojson-vt/leaflet-geojson-vt.js"></script>
+  <style>
+    #map { height: 60vh; }
+    .leaflet-tooltip { font-size: 14px; font-weight: bold; }
+  </style>
+  <script>
+    const map = L.map('map', {
+      center: [22.9734, 78.6569],
+      zoom: 5,
+      zoomControl: true,
+      attributionControl: false,
+      maxBounds: [[6, 67], [37, 97]], // India bounding box
+      maxBoundsViscosity: 1.0
+    });
+    L.tileLayer('', { attribution: '' }).addTo(map);
+    fetch("https://raw.githubusercontent.com/geohacker/india/master/state/india_telengana.geojson")
+      .then(res => res.json())
+      .then(geojson => {
+        const indiaLayer = L.geoJSON(geojson, {
+          style: {
+            color: "#333",
+            fillColor: "#f4f4f4",
+            fillOpacity: 1,
+            weight: 1
+          }
+        }).addTo(map);
+        map.fitBounds(indiaLayer.getBounds(), { padding: [10, 10] });
+      });
+    const cities = [
+      { name: "Sricity", lat: 13.8132, lng: 80.0026 },
+      { name: "Nellore", lat: 14.4426, lng: 79.9865 },
+      { name: "Sullurupeta", lat: 13.7057, lng: 80.0179 },
+      { name: "Hyderabad", lat: 17.3850, lng: 78.4867 },
+      { name: "Vizag", lat: 17.6868, lng: 83.2185 },
+      { name: "Naidupeta", lat: 13.8868, lng: 79.8966 },
+      { name: "Chennai", lat: 13.0827, lng: 80.2707 },
+      { name: "Karnataka", lat: 12.9716, lng: 77.5946 },
+      { name: "Chittor", lat: 13.2172, lng: 79.1003 },
+      { name: "Tirupathi", lat: 13.6288, lng: 79.4192 },
+      { name: "Renigunta", lat: 13.6368, lng: 79.4996 },
+    ];
+    cities.forEach(city => {
+      const marker = L.marker([city.lat, city.lng])
+        .addTo(map)
+        .bindTooltip(city.name, { permanent: false, direction: "top" });
+      marker.on('click', function() {
+        showCompanyInfoModal(city.name);
+      });
+    });
+
+    // City to companies mapping
+    /*const cityCompanies = {
+      "Hyderabad": ["Dr. Reddy's Labs", "Aurobindo Pharma", "TCS Hyderabad"],
+      "Sricity": ["Cocacola", "Kajaria Ceramics", "Amara Raja Batteries"],
+      "Nellore": ["Mother Dairy", "Ultramarine & Pigments", "Bharath Petroleum"],
+      "Sullurupeta": ["Mondelez India Foods", "Rockman Industries", "Hetero Labs"],
+      "Vizag": ["LG Polymers", "Godrej", "Birla Corporation"],
+      "Naidupeta": ["Ultramarine & Pigments", "Ms Agarwal Foundries", "Kajaria Ceramics"],
+      "Chennai": ["LG Electronics", "Patanjali Foods", "Chettinad Cement"],
+      "Karnataka": ["Bharath Petroleum", "Hero MotoCorp", "Tata Steel"],
+      "Chittor": ["Ms Agarwal Foundries", "Parksons Packaging", "Synthite Industries"],
+      "Tirupathi": ["PFI", "Amber Enterprises", "Visaka Industries"],
+      "Renigunta": ["Hamilton Housewares", "CMR Green Technologies", "Anjani Portland Cement"],
+    };*/
+
+    /*function showCompanyInfoModal(cityName) {
+      const modal = document.getElementById('companyInfoModal');
+      const content = document.getElementById('companyInfoContent');
+      const modalBg = modal.querySelector('.company-info-modal-bg');
+      const companies = cityCompanies[cityName] || [];
+      content.innerHTML = `<h3 style='font-size:1.4rem; font-weight:bold; color:#3b82f6; margin-bottom:1rem;'>Medical Camps in ${cityName}</h3>` +
+        (companies.length ?
+          `<ul style='margin-bottom:1.2rem;'>${companies.map(c => `<li style='font-size:1.1rem; margin-bottom:0.5rem;'>${c}</li>`).join('')}</ul>` :
+          `<div style='color:#888; font-size:1.1rem;'>No company data available for this location.</div>`
+        );
+      modal.style.display = 'flex';
+      if (modalBg) {
+        modalBg.classList.remove('modal-animate-in');
+        // Force reflow to restart animation
+        void modalBg.offsetWidth;
+        modalBg.classList.add('modal-animate-in');
+      }
+    }
+    document.getElementById('closeCompanyInfoModal').onclick = function() {
+      document.getElementById('companyInfoModal').style.display = 'none';
+      const modalBg = document.querySelector('.company-info-modal-bg');
+      if (modalBg) modalBg.classList.remove('modal-animate-in');
+    };
+    document.getElementById('companyInfoModal').onclick = function(e) {
+      if (e.target === this) {
+        this.style.display = 'none';
+        const modalBg = this.querySelector('.company-info-modal-bg');
+        if (modalBg) modalBg.classList.remove('modal-animate-in');
+      }
+    };*/
+  </script>
+</section>
+-->
+
+
+        <!-- Company Logo Carousel (Seamless Infinite Scroll with Arrows) -->
+        <section id="company-slideshow" class="py-16 bg-gradient-to-br from-blue-50 to-blue-100 section-fade-in">
+          <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-blue-800 mb-10 animated-element">Trusted By Leading Companies</h2>
+            <div class="carousel-outer">
+              <button class="carousel-arrow left" aria-label="Previous">&#8592;</button>
+              <div class="carousel-track">
+                <img src="Clients/Mother_Dairy_logo.png" alt="Mother Dairy">
+                <img src="Clients/Amber-Logo.png" alt="Amber">
+                <img src="Clients/parasakti-logo.png" alt="Parasakti">
+                <img src="Clients/Kajaria_logi.png" alt="Kajaria">
+                <img src="Clients/Visaka-logo.png" alt="Visaka">
+                <img src="Clients/CMR-Green-Logo.png" alt="CMR Green">
+                <img src="Clients/logo-grenlamp.png" alt="Greenlamp">
+                <img src="Clients/Parksons-logo.png" alt="Parksons">
+                <img src="Clients/Synthite_logo.png" alt="Synthite">
+                <img src="Clients/Hngil_logo.png" alt="Hngil">
+                <img src="Clients/Coca-Cola_India_logo.png" alt="Coca-Cola India">
+                <img src="Clients/Pulkit_logo.png" alt="Pulkit">
+                <img src="Clients/Hero_Logo.png" alt="Hero">
+                <img src="Clients/Mondelez_logo.png" alt="Mondelez">
+                <img src="Clients/Anjani_logo.png" alt="Anjani">
+                <img src="Clients/Chettinad-logo.png" alt="Chettinad">
+                <img src="Clients/Birla_logo.jpeg" alt="Birla">
+                <img src="Clients/PFI_logo.png" alt="PFI">
+                <img src="Clients/MsAgarwal_logo.png" alt="Ms Agarwal">
+                <img src="Clients/Amaron_Logo.jpg" alt="Amaron">
+                <img src="Clients/Bharath_Petroleum.jpeg" alt="Bharath Petroleum">
+                <img src="Clients/Hetro-logo.png" alt="Hetro">
+                <img src="Clients/tata-steel-logo.png" alt="Tata Steel">
+                <img src="Clients/Godrej.jpeg" alt="Godrej">
+                <img src="Clients/Lg.png" alt="LG">
+              </div>
+              <button class="carousel-arrow right" aria-label="Next">&#8594;</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Testimonials Section >
+        <section id="testimonials" class="py-20 bg-blue-100 section-fade-in">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold text-blue-800 mb-14 animated-element">Hear From Our Satisfied Clients</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <div class="bg-white p-8 rounded-2xl shadow-lg text-left card-effect border-t-4 border-blue-600 animated-element delay-1">
+                        <p class="text-gray-700 italic text-lg mb-6 leading-relaxed">"Maxon's on-site medical camps have significantly boosted our employee morale and productivity. Their team is incredibly professional and efficient. Highly recommended!"</p>
+                        <div class="flex items-center">
+                            <img src="https://placehold.co/60x60/81C784/FFFFFF?text=JD" alt="Client Avatar" class="rounded-full mr-4 shadow-md">
+                            <div>
+                                <p class="font-bold text-blue-800 text-lg">- Jane Doe</p>
+                                <p class="text-gray-500 text-sm">HR Director, Tech Innovators</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg text-left card-effect border-t-4 border-blue-600 animated-element delay-2">
+                        <p class="text-gray-700 italic text-lg mb-6 leading-relaxed">"The convenience of having expert medical consultations at our workplace is invaluable. Maxon truly understands the needs of modern businesses."</p>
+                        <div class="flex items-center">
+                            <img src="https://placehold.co/60x60/64B5F6/FFFFFF?text=JS" alt="Client Avatar" class="rounded-full mr-4 shadow-md">
+                            <div>
+                                <p class="font-bold text-blue-800 text-lg">- John Smith</p>
+                                <p class="text-gray-500 text-sm">CEO, Global Solutions</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-lg text-left card-effect border-t-4 border-blue-600 animated-element delay-3">
+                        <p class="text-gray-700 italic text-lg mb-6 leading-relaxed">"Our vaccination drive was seamless, thanks to Maxon's meticulous planning and execution. A fantastic service that truly cares about employee well-being."</p>
+                        <div class="flex items-center">
+                            <img src="https://placehold.co/60x60/FFD54F/FFFFFF?text=EW" alt="Client Avatar" class="rounded-full mr-4 shadow-md">
+                            <div>
+                                <p class="font-bold text-blue-800 text-lg">- Emily White</p>
+                                <p class="text-gray-500 text-sm">Operations Head, Apex Manufacturing</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section-->
+
+        <!-- Call to Action Section -->
+        <section class="py-20 bg-gradient-to-r from-blue-700 to-blue-900 text-white text-center section-fade-in">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-extrabold mb-6 animated-element drop-shadow-md">Ready to Prioritize Employee Health?</h2>
+                <p class="text-xl max-w-3xl mx-auto mb-10 animated-element delay-1 drop-shadow-sm">Partner with Maxon Medical to bring world-class healthcare directly to your team, boosting productivity and well-being.</p>
+                <button class="bg-white text-blue-800 font-bold py-4 px-12 rounded-full shadow-xl hover:bg-gray-100 transition duration-300 btn-primary animated-element delay-2" onclick="openBookingPopup()">
+                    <i class="fas fa-calendar-alt mr-3"></i> Request a Free Consultation
+                </button>
+            </div>
+        </section>
+
+        <!-- Floating Chatbot Icon and Modal -->
+        <div id="chatbot-fab" style="position: fixed; bottom: 32px; right: 32px; z-index: 9999; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,0.18); cursor: pointer;">
+          <i class="fas fa-comments" style="color: #fff; font-size: 2rem;"></i>
+        </div>
+        <div id="chatbot-modal" style="display: none; position: fixed; bottom: 110px; right: 32px; z-index: 10000; width: 350px; max-width: 95vw; background: #fff; border-radius: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 1rem 1.2rem;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <img src="maxonlogo.png" alt="Maxon Logo" style="width: 32px; height: 32px; background: #fff; padding: 2px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);">
+              <span style="font-weight: bold; font-size: 1.1rem;">Maxon Assistant</span>
+            </div>
+            <button id="chatbot-close" style="background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer;">&times;</button>
+          </div>
+          <div id="chatbot-messages" style="height: 320px; max-height: 50vh; overflow-y: auto; padding: 1rem; background: #f7f8fa; font-size: 1rem;"></div>
+          <form id="chatbot-form" style="display: flex; border-top: 1px solid #e1e5e9; background: #fff;">
+            <input id="chatbot-input" type="text" placeholder="Ask about Maxon..." style="flex: 1; border: none; padding: 1rem; font-size: 1rem; outline: none; background: #fff;">
+            <button type="submit" style="background: none; border: none; color: #667eea; font-size: 1.5rem; padding: 0 1rem; cursor: pointer;"><i class="fas fa-paper-plane"></i></button>
+          </form>
+        </div>
+        <style>
+          #chatbot-fab:hover { filter: brightness(1.1); }
+          #chatbot-modal { animation: chatbot-pop 0.2s; }
+          @keyframes chatbot-pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+          #chatbot-messages { scrollbar-width: thin; }
+          #chatbot-messages::-webkit-scrollbar { width: 6px; background: #eee; }
+          #chatbot-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+          .chatbot-msg-user { background: #667eea; color: #fff; border-radius: 16px 16px 4px 16px; margin-bottom: 8px; padding: 8px 14px; align-self: flex-end; max-width: 80%; word-break: break-word; }
+          .chatbot-msg-bot { background: #f1f2f6; color: #333; border-radius: 16px 16px 16px 4px; margin-bottom: 8px; padding: 8px 14px; align-self: flex-start; max-width: 80%; word-break: break-word; }
+        </style>
+        <script>
+            (function() {
+              // Floating Chatbot Logic (no global variable conflicts)
+              const chatbotFabBtn = document.getElementById('chatbot-fab');
+              const chatbotModalBox = document.getElementById('chatbot-modal');
+              const chatbotCloseBtn = document.getElementById('chatbot-close');
+              const chatbotFormBox = document.getElementById('chatbot-form');
+              const chatbotInputBox = document.getElementById('chatbot-input');
+              const chatbotMessagesBox = document.getElementById('chatbot-messages');
+            
+              if (chatbotFabBtn) chatbotFabBtn.onclick = () => { chatbotModalBox.style.display = 'block'; chatbotInputBox.focus(); };
+              if (chatbotCloseBtn) chatbotCloseBtn.onclick = () => { chatbotModalBox.style.display = 'none'; };
+              document.addEventListener('click', function(e) {
+                if (chatbotModalBox.style.display === 'block' && !chatbotModalBox.contains(e.target) && e.target !== chatbotFabBtn && !chatbotFabBtn.contains(e.target)) {
+                  chatbotModalBox.style.display = 'none';
+                }
+              });
+              function appendMsg(msg, sender) {
+                const div = document.createElement('div');
+                div.className = sender === 'user' ? 'chatbot-msg-user' : 'chatbot-msg-bot';
+                div.textContent = msg;
+                chatbotMessagesBox.appendChild(div);
+                chatbotMessagesBox.scrollTop = chatbotMessagesBox.scrollHeight;
+              }
+              function botReply(q) {
+                // Simple Q&A logic for Maxon organization
+                const lower = q.trim().toLowerCase();
+                if (!lower) return "Please ask a question about Maxon Healthcare.";
+                if (lower.includes('service') || lower.includes('offer')) return "Maxon Healthcare offers on-site medical camps, lab tests, X-ray, ECG, 2D Echo, first aid training, audiometry, vaccinations, and more for organizations and individuals.";
+                if (lower.includes('contact')) return "You can contact us at info@maxonhealth.in or call 8790289947, 9866279831.";
+                if (lower.includes('location') || lower.includes('address')) return "We are located at Sundaraiahbhavan road, Ongole, Prakasam Dist., AP-523002.";
+                if (lower.includes('book') || lower.includes('test')) return "To book a test, click the 'Book A Test' button or use the 'Request a Free Consultation' button above.";
+                if (lower.includes('about')) return "Maxon Healthcare is dedicated to providing convenient and comprehensive on-site medical camp solutions for a healthier workforce across India.";
+                if (lower.includes('price') || lower.includes('cost')) return "For detailed pricing, please contact us directly or request a consultation.";
+                if (lower.includes('team') || lower.includes('doctor')) return "Our team includes certified healthcare professionals, lab technicians, and doctors with years of experience.";
+                if (lower.includes('nabl')) return "Yes, our laboratory services are NABL-accredited for quality and accuracy.";
+                if (lower.includes('how')) return "We organize on-site medical camps, health checkups, and wellness programs tailored to your organization's needs.";
+                if (lower.includes('why')) return "Maxon Healthcare is trusted by 200+ clients for quality, reliability, and end-to-end health solutions.";
+                return "I'm Maxon's virtual assistant. Please ask about our services, booking, or company info!";
+              }
+              if (chatbotFormBox) chatbotFormBox.onsubmit = function(e) {
+                e.preventDefault();
+                const q = chatbotInputBox.value;
+                if (!q.trim()) return;
+                appendMsg(q, 'user');
+                setTimeout(() => {
+                  appendMsg(botReply(q), 'bot');
+                }, 400);
+                chatbotInputBox.value = '';
+              };
+            })();
+            </script>
+
+
+        <!-- Contact Us Section -->
+        <section id="contact" class="py-20 bg-white section-fade-in">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold text-blue-800 mb-14 animated-element">Connect With Maxon Healthcare</h2>
+                <div class="max-w-3xl mx-auto">
+                    <div class="text-left bg-blue-50 p-8 md:p-12 rounded-2xl shadow-lg border border-blue-100 animated-element delay-1">
+                        <h3 class="text-3xl font-bold text-blue-800 mb-8 text-center">Send Us a Message</h3>
+                        <div class="mb-8 text-center md:text-left">
+                            <p class="text-lg text-blue-800 font-semibold mb-3"><i class="fas fa-map-marker-alt mr-3 text-blue-500"></i><a href="https://www.google.com/maps/place/Maxon+Healthcare/@15.5104227,80.0366496,17z/data=!3m1!4b1!4m6!3m5!1s0x3a4b0118e5e3b615:0xb23af67bf1b5d8a9!8m2!3d15.5104227!4d80.0392245!16s%2Fg%2F11h_7yc_2s" target="_blank" rel="noopener" style="text-decoration: none;">Sundaraiahbhavan road, Ongole, Prakasam Dist., AP-523002</a></p>
+                            <p class="text-lg text-blue-800 font-semibold mb-3"><i class="fas fa-envelope mr-3 text-blue-500"></i><a href="mailto:info@maxonhealth.in" style="text-decoration: none;">info@maxonhealth.in</a>, <a href="mailto:udaykiran@maxonhealth.in" style="text-decoration: none;">udaykiran@maxonhealth.in</a></p>
+                            <p class="text-lg text-blue-800 font-semibold"><i class="fas fa-phone mr-3 text-blue-500"></i><a href="tel:+918790289947" style="text-decoration: none;">8790289947</a>, <a href="tel:+919866279831" style="text-decoration: none;">9866279831</a></p>
+                        </div>
+                        <form class="space-y-6" id="contactForm" onsubmit="return false;">
+                            <div>
+                                <label for="name" class="block text-gray-700 text-base font-semibold mb-2">Your Name:</label>
+                                <input type="text" id="name" name="name" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out" required>
+                            </div>
+                            <div>
+                                <label for="email" class="block text-gray-700 text-base font-semibold mb-2">Your Email:</label>
+                                <input type="email" id="email" name="email" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out" required>
+                            </div>
+                            <div>
+                                <label for="message" class="block text-gray-700 text-base font-semibold mb-2">Your Message:</label>
+                                <textarea id="message" name="message" rows="6" class="shadow-sm appearance-none border border-gray-300 rounded-lg w-full py-3 px-4 text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300 ease-in-out" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-blue-800 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:from-blue-700 hover:to-blue-900 transition duration-300 btn-primary">
+                                Submit Inquiry <i class="fas fa-paper-plane ml-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- FAQ Section -->
+        <section id="faq" class="py-20 bg-blue-50 section-fade-in">
+          <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold text-blue-800 mb-14 animated-element">Frequently Asked Questions</h2>
+            <div class="max-w-3xl mx-auto text-left space-y-8">
+              <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-bold text-lg text-blue-700 mb-2">What services does Maxon Healthcare provide?</h3>
+                <p class="text-gray-700">We offer on-site medical camps, lab tests, X-ray, ECG, 2D Echo, first aid training, audiometry, vaccinations, and more for organizations and individuals.</p>
+              </div>
+              <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-bold text-lg text-blue-700 mb-2">How do I book a medical camp or test?</h3>
+                <p class="text-gray-700">You can use the 'Book A Test' button or the consultation request on our homepage, or contact us directly via phone or email.</p>
+              </div>
+              <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-bold text-lg text-blue-700 mb-2">Are your laboratory services accredited?</h3>
+                <p class="text-gray-700">Yes, our laboratory services are NABL-accredited for quality and accuracy.</p>
+              </div>
+              <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="font-bold text-lg text-blue-700 mb-2">Can you organize health camps outside major cities?</h3>
+                <p class="text-gray-700">Absolutely! We serve clients across India, including remote and rural locations.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Blog/News Section -->
+        <section id="blog" class="py-20 bg-white section-fade-in">
+          <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold text-blue-800 mb-14 animated-element">Latest News & Health Tips</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+              <div class="bg-blue-50 p-6 rounded-xl shadow-md text-left">
+                <h3 class="font-bold text-xl text-blue-700 mb-2">5 Tips for a Healthier Workplace</h3>
+                <p class="text-gray-700 mb-4">Discover simple ways to boost employee well-being and productivity through workplace wellness programs.</p>
+                <a href="#" class="text-blue-600 font-semibold hover:underline">Read More</a>
+              </div>
+              <div class="bg-blue-50 p-6 rounded-xl shadow-md text-left">
+                <h3 class="font-bold text-xl text-blue-700 mb-2">Maxon Organizes Mega Camp in Hyderabad</h3>
+                <p class="text-gray-700 mb-4">Our recent camp served over 1,000 employees with comprehensive health checks and vaccinations.</p>
+                <a href="#" class="text-blue-600 font-semibold hover:underline">Read More</a>
+              </div>
+              <div class="bg-blue-50 p-6 rounded-xl shadow-md text-left">
+                <h3 class="font-bold text-xl text-blue-700 mb-2">Why On-Site Medical Camps Matter</h3>
+                <p class="text-gray-700 mb-4">Learn how on-site health services can reduce absenteeism and improve workforce morale.</p>
+                <a href="#" class="text-blue-600 font-semibold hover:underline">Read More</a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- Newsletter Signup Section -->
+        <section id="newsletter" class="py-16 bg-gradient-to-r from-blue-600 to-blue-800 text-white text-center section-fade-in">
+          <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold mb-4">Subscribe to Our Newsletter</h2>
+            <p class="mb-8 text-lg">Get the latest updates, health tips, and news from Maxon Healthcare directly to your inbox.</p>
+            <form class="max-w-xl mx-auto flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <input type="email" placeholder="Enter your email address" required class="w-full sm:w-auto flex-1 px-6 py-3 rounded-full text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-300" />
+              <button type="submit" class="bg-white text-blue-800 font-bold px-8 py-3 rounded-full shadow hover:bg-blue-100 transition duration-300">Subscribe</button>
+            </form>
+          </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12" style="background: linear-gradient(90deg,#0051ff 100%,#8000ff);">
+      <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div>
+          <h4 class="font-extrabold text-2xl mb-5" style="color:#f79aff;">Maxon Healthcare<span style="color:#00b6c9;">.</span></h4>
+          <p class="text-gray-100 leading-relaxed">Your dedicated partner in delivering convenient and comprehensive on-site medical camp solutions for a healthier workforce across India.</p>
+        </div>
+        <div>
+          <h4 class="font-bold text-xl mb-5" style="color:#f79aff;">Quick Links</h4>
+          <ul class="space-y-2 list-none">
+            <a href="#hello" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Home</a>
+            <a href="#home-gallery" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Our Gallery</a>
+            <a href="#about" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> About Us</a>
+            <a href="#services" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Services</a>
+            <a href="#why-choose-us" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Why Us?</a>
+            <a href="#certifications" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Certifications</a>
+            <a href="#impact" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Impact</a>
+            <a href="#india-map-section" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Our Reach</a>
+            <!--li><a href="#testimonials" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Testimonials</a></li-->
+            <a href="#contact" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Contact</a>
+          </ul>
+          
+        </div>
+        <div>
+          <h4 class="font-bold text-xl mb-5" style="
+          color: #f79aff;-webkit-background-clip: text;background-clip: text;">Contact Info</h4>
+          <p class="mb-3"><i class="fas fa-map-marker-alt mr-3" style="color:#00b6c9;"></i><a href="https://www.google.com/maps/place/Maxon+Healthcare/@15.5104227,80.0366496,17z/data=!3m1!4b1!4m6!3m5!1s0x3a4b0118e5e3b615:0xb23af67bf1b5d8a9!8m2!3d15.5104227!4d80.0392245!16s%2Fg%2F11h_7yc_2s" target="_blank" rel="noopener" style="text-decoration: none;">Sundaraiahbhavan road, Ongole, Prakasam Dist., AP-523002</a></p>
+          <p class="mb-3"><i class="fas fa-phone mr-3" style="color:#00b6c9;"></i><a href="tel:+919866279831" style="text-decoration: none;">+91 9866279831</a></p>
+          <p class="mb-3"><i class="fas fa-phone mr-3" style="color:#00b6c9;"></i><a href="tel:+918790289947" style="text-decoration: none;">+91 8790289947</a></p>
+          <p><i class="fas fa-envelope mr-3" style="color:#00b6c9;"></i><a href="mailto:info@maxonhealth.in" style="text-decoration: none;">info@maxonhealth.in</a></p>
+          <div class="flex space-x-4 mt-6">
+            <a href="#" class="text-gray-100 social-icon-effect"><i class="fab fa-facebook-f text-2xl"></i></a>
+            <a href="#" class="text-gray-100 social-icon-effect"><i class="fab fa-twitter text-2xl"></i></a>
+            <a href="#" class="text-gray-100 social-icon-effect"><i class="fab fa-linkedin-in text-2xl"></i></a>
+            <a href="https://www.instagram.com/maxonhealthcare/" style="text-decoration: none;" class="text-gray-100 social-icon-effect"><i class="fab fa-instagram text-2xl"></i></a>
+          </div>
+        </div>
+      </div>
+      <div class="text-center text-gray-200 mt-10 text-sm">
+        &copy; 2024-2025 Maxon Healthcare. All rights reserved. | Designed with <i class="fas fa-heart text-red-500 mx-1"></i>
+      </div>
+    </footer>
+
+   <!-- Responsive Fixed Footer -->
+<footer class="fixed bottom-0 left-0 w-full z-50 bg-gradient-to-r from-blue-600 to-blue-800 text-white py-3 shadow-lg"style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <div class="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between">
+    <div class="text-center sm:text-left text-sm">
+      <span>
+        <i class="fas fa-map-marker-alt mr-2"></i>
+        <strong>Location:</strong>
+        <a href="https://www.google.com/maps/place/Maxon+Healthcare/@15.5104227,80.0366496,17z/data=!3m1!4b1!4m6!3m5!1s0x3a4b0118e5e3b615:0xb23af67bf1b5d8a9!8m2!3d15.5104227!4d80.0392245!16s%2Fg%2F11h_7yc_2s" class="underline hover:text-blue-200" target="_blank" rel="noopener">Sundaraiahbhavan road, Ongole, AP</a>
+      </span>
+    </div>
+    <div class="text-center sm:text-right mt-2 sm:mt-0 text-sm">
+      <a href="mailto:info@maxonhealth.in" class="underline hover:text-blue-200 mr-3">
+        <i class="fas fa-envelope mr-1"></i> info@maxonhealth.in
+      </a>
+      <a href="tel:8790289947" class="underline hover:text-blue-200">
+        <i class="fas fa-phone mr-1"></i> 8790289947
+      </a>
+    </div>
+  </div>
+</footer>
+
+    <!-- Service Details Modal -->
+    <div id="service-modal" class="service-modal">
+        <div class="service-modal-content popup-logo-bg">
+            <span class="service-modal-close" id="service-modal-close">&times;</span>
+            <div id="service-modal-body"></div>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+    <script>
+      // Wait for DOM to be fully loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        
+        // Handle Contact Us form submission
+        const contactForm = document.getElementById('contactForm');
+        if (contactForm) {
+          console.log('Contact form found, adding event listener');
+          
+          contactForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submitted, preventing default');
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+
+            // Validate form data
+            if (!name || !email || !message) {
+              alert('Please fill in all required fields.');
+              return;
+            }
+
+            const formData = {
+              name: name,
+              email: email,
+              message: message
+            };
+
+            console.log('Sending form data:', formData);
+
+            try {
+              // Show loading state
+              const submitBtn = this.querySelector('button[type="submit"]');
+              if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Sending...';
+                submitBtn.disabled = true;
+              }
+
+              // Send data to backend
+              const response = await fetch('' +
+                  '/contact_us', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+              });
+
+              console.log('Response status:', response.status);
+
+              if (response.ok) {
+                const result = await response.json();
+                  alert('Thank you for your message! We will get back to you soon.🙂');
+                this.reset(); // Reset form
+                console.log('Form submitted successfully');
+              } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to submit inquiry');
+              }
+            } catch (error) {
+              console.error('Error submitting inquiry:', error);
+              alert('Sorry, there was an error sending your message. Please try again or contact us directly.');
+            } finally {
+              // Reset button state
+              const submitBtn = this.querySelector('button[type="submit"]');
+              if (submitBtn) {
+                submitBtn.innerHTML = 'Submit Inquiry <i class="fas fa-paper-plane ml-2"></i>';
+                submitBtn.disabled = false;
+              }
+            }
+          });
+        } else {
+          console.log('Contact form not found');
+        }
+
+        // Handle other buttons if they exist
+        const loginModalBtn = document.getElementById('open-login-modal');
+        if (loginModalBtn) {
+          loginModalBtn.addEventListener('click', function() {
+            window.location.href = "login.html";
+          });
+        }
+
+        const discoverBtn = document.getElementById('discover-solutions-btn');
+        if (discoverBtn) {
+          discoverBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const section = document.getElementById('services');
+            if (section) {
+              section.scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+        }
+      });
+    </script>
+
+    <div class="mobile-drawer-menu" id="mobile-drawer-menu">
+      <button class="drawer-close" id="drawer-close" aria-label="Close menu">&times;</button>
+      <ul class="space-y-2 list-none">
+        <li><a href="#hello" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Home</a></li>
+        <li><a href="#home-gallery" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Our Gallery</a></li>
+        <li><a href="#about" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> About Us</a></li>
+        <li><a href="#services" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Services</a></li>
+        <li><a href="#why-choose-us" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Why Us?</a></li>
+        <li><a href="#certifications" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Certifications</a></li>
+        <li><a href="#impact" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Impact</a></li>
+        <li><a href="#india-map-section" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Our Reach</a></li>
+        <!--li><a href="#testimonials" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Testimonials</a></li-->
+        <li><a href="#contact" class="text-gray-100 hover:text-white transition duration-300"><i class="fas fa-angle-right mr-2"></i> Contact</a></li>
+      </ul>
+    </div>
+    <div class="mobile-drawer-menu-backdrop" id="mobile-drawer-menu-backdrop"></div>
+    <script>
+    // Hamburger drawer menu logic for mobile/tablet with slide-down animation for menu items
+    (function() {
+      const hamburger = document.getElementById('mobile-hamburger');
+      const drawer = document.getElementById('mobile-drawer-menu');
+      const closeBtn = document.getElementById('drawer-close');
+      const backdrop = document.getElementById('mobile-drawer-menu-backdrop');
+      const menuItems = drawer ? drawer.querySelectorAll('ul li') : [];
+      if (hamburger && drawer && closeBtn && backdrop) {
+        hamburger.onclick = function(e) {
+          e.stopPropagation();
+          drawer.classList.add('open');
+          hamburger.setAttribute('aria-expanded', 'true');
+          backdrop.style.display = 'block';
+          // Animate menu items with stagger
+          menuItems.forEach((li, idx) => {
+            li.style.transitionDelay = (0.08 * idx) + 's';
+          });
+        };
+        function closeDrawer() {
+          drawer.classList.remove('open');
+          hamburger.setAttribute('aria-expanded', 'false');
+          backdrop.style.display = 'none';
+          // Reset transition delays for next open
+          menuItems.forEach((li) => {
+            li.style.transitionDelay = '0s';
+          });
+        }
+        closeBtn.onclick = closeDrawer;
+        backdrop.onclick = closeDrawer;
+        // Close drawer on link click
+        drawer.querySelectorAll('a').forEach(function(link) {
+          link.onclick = closeDrawer;
+        });
+      }
+    })();
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      if (!userData) {
+        // Not logged in, show login modal or message instead of redirecting
+        // Optionally, you can open the login popup here:
+        // openLoginPopup();
+        // Or show a message:
+        // alert('Please log in to access your dashboard.');
+        return;
+      }
+      // Render user details
+      //document.getElementById('userName').textContent = userData.name;
+      //document.getElementById('userEmpId').textContent = userData.empid;
+      //document.getElementById('userPdf').href = userData.pdf;
+    });
+    </script>
+
+    <script>
+    // Animate map pins drop-in when section is in view
+    function animateMapPins() {
+      const pins = document.querySelectorAll('.map-pin');
+      console.log('Animating pins:', pins.length);
+      pins.forEach((pin, idx) => {
+        setTimeout(() => {
+          pin.classList.add('pin-drop');
+          console.log('Dropped pin', idx);
+        }, idx * 180);
+      });
+    }
+    // Intersection Observer for map section
+    const indiaMapSection = document.getElementById('india-map-section');
+    if (indiaMapSection) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+          // Wait a bit to ensure all pins are rendered
+          setTimeout(animateMapPins, 400);
+          observer.disconnect();
+        }
+      }, { threshold: 0.3 });
+      observer.observe(indiaMapSection);
+    }
+    // Add .map-pin class to each marker icon after it's added to map
+    cities.forEach((city, idx) => {
+      const marker = L.marker([city.lat, city.lng])
+        .addTo(map)
+        .bindTooltip(city.name, { permanent: false, direction: "top" });
+      marker.on('click', function() {
+        showCompanyInfoModal(city.name);
+      });
+      marker.on('add', function() {
+        setTimeout(() => {
+          if (marker._icon) {
+            marker._icon.classList.add('map-pin');
+            console.log('Added .map-pin to', city.name);
+          }
+        }, 10);
+      });
+    });
+    </script>
+
+    <script>
+    // Hero text scroll animation
+    (function() {
+      function isInViewport(el) {
+        const rect = el.getBoundingClientRect();
+        return (
+          rect.top < window.innerHeight &&
+          rect.bottom > 0
+        );
+      }
+      function handleHeroAnimation() {
+        document.querySelectorAll('.hero-animate').forEach(function(el) {
+          if (isInViewport(el)) {
+            el.classList.add('in-view');
+            el.classList.remove('out-view');
+          } else {
+            el.classList.remove('in-view');
+            el.classList.add('out-view');
+          }
+        });
+      }
+      window.addEventListener('scroll', handleHeroAnimation);
+      window.addEventListener('resize', handleHeroAnimation);
+      document.addEventListener('DOMContentLoaded', handleHeroAnimation);
+    })();
+    </script>
+
+    <script>
+    // Slideshow logic to ensure only one image is visible at a time
+    (function() {
+      const slides = document.querySelectorAll('.slideshow-img');
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        slides.forEach((img, i) => {
+          img.classList.toggle('active', i === index);
+        });
+      }
+
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }
+
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+      }
+
+      // Initial display
+      showSlide(currentSlide);
+
+      // Add event listeners for next/prev buttons
+      document.getElementById('slideshow-next').addEventListener('click', nextSlide);
+      document.getElementById('slideshow-prev').addEventListener('click', prevSlide);
+
+      // Optionally, auto-advance slides every X seconds
+      // setInterval(nextSlide, 5000);
+    })();
+    </script>
+
+    <script>
+    // Pop-up animation on scroll up for hero-glass-bg
+    (function() {
+      let lastScrollY = window.scrollY;
+      let ticking = false;
+      const heroGlass = document.querySelector('.hero-glass-bg');
+      if (!heroGlass) return;
+      function onScroll() {
+        const currentY = window.scrollY;
+        if (currentY < lastScrollY && currentY > 40) { // scrolling up, not at top
+          heroGlass.classList.remove('pop-animate');
+          // force reflow to restart animation
+          void heroGlass.offsetWidth;
+          heroGlass.classList.add('pop-animate');
+        }
+        lastScrollY = currentY;
+        ticking = false;
+      }
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          window.requestAnimationFrame(onScroll);
+          ticking = true;
+        }
+      });
+      // Remove animation class after animation ends
+      heroGlass.addEventListener('animationend', function() {
+        heroGlass.classList.remove('pop-animate');
+      });
+    })();
+    </script>
+    <style>
+    .pop-animate {
+      animation: popInHero 0.6s cubic-bezier(0.4,0,0.2,1);
+    }
+    @keyframes popInHero {
+      0% { opacity: 0.2; transform: scale(0.92) translateY(40px); }
+      60% { opacity: 1; transform: scale(1.04) translateY(-8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    </style>
+</body>
+</html>
